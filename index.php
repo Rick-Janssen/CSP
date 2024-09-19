@@ -9,6 +9,7 @@ $routes = array(
     "GET" => array(
         "/CSPBackend/products" => ["ProductController", "index"],
         "/CSPBackend/product/(\d+)" => ["ProductController", "show"],
+
     ),
     "POST" => array(
         "/CSPBackend/products" => ["ProductController", "store"],

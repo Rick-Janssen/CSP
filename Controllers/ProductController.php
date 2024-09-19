@@ -7,23 +7,50 @@ class ProductController
     {
         $conn = connectToDatabase();
 
-        $sql = "SELECT * FROM `products`";
+        $sql = "
+        SELECT p.id as product_id, p.name as product_name, r.id as review_id, r.title, r.rating, r.content
+        FROM products p
+        LEFT JOIN reviews r ON p.id = r.product_id
+    ";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute();
         $result = $stmt->get_result();
 
-        if ($result->num_rows > 0) {
-            $rows = $result->fetch_all(MYSQLI_ASSOC);
-            echo json_encode($rows);
-        } else {
-            echo json_encode(array("message" => "No products found with ratings"));
+        $products = [];
+
+        while ($row = $result->fetch_assoc()) {
+            $productId = $row['product_id'];
+
+            if (!isset($products[$productId])) {
+                $products[$productId] = [
+                    'id' => $row['product_id'],
+                    'name' => $row['product_name'],
+                    'reviews' => []
+                ];
+            }
+
+            if ($row['review_id'] !== null) {
+                $products[$productId]['reviews'][] = [
+                    'title' => $row['title'],
+                    'content' => $row['content'],
+                    'rating' => $row['rating'],
+                ];
+            }
         }
 
+        $products = array_values($products);
+
+        if (!empty($products)) {
+            echo json_encode($products);
+        } else {
+            echo json_encode(["message" => "No products or reviews found"]);
+        }
 
         $stmt->close();
         $conn->close();
     }
+
     public function show($id)
     {
         $conn = connectToDatabase();
