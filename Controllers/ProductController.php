@@ -8,7 +8,7 @@ class ProductController
         $conn = connectToDatabase();
 
         $sql = "
-        SELECT p.id as product_id,  p.content, p.image_url, p.origin, p.type ,  p.name product_name, r.id as review_id, r.title, r.rating, r.content
+        SELECT p.id as product_id, p.description, p.image_url, p.origin, p.type ,  p.name product_name, r.id as review_id, r.title, r.rating, r.content
         FROM products p
         LEFT JOIN reviews r ON p.id = r.product_id
     ";
@@ -26,7 +26,7 @@ class ProductController
                 $products[$productId] = [
                     'id' => $row['product_id'],
                     'name' => $row['product_name'],
-                    'content' => $row['content'],
+                    'description' => $row['description'],
                     'image_url' => $row['image_url'],
                     'origin' => $row['origin'],
                     'type' => $row['type'],
