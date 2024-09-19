@@ -6,20 +6,38 @@ foreach ($controllers as $controller) {
 }
 
 $routes = array(
-    "/CSPBackend/products" => ["ProductController", "index"],
-    "/CSPBackend/product/(\d+)" => ["ProductController", "show"],
+    "GET" => array(
+        "/CSPBackend/products" => ["ProductController", "index"],
+        "/CSPBackend/product/(\d+)" => ["ProductController", "show"],
+    ),
+    "POST" => array(
+        "/CSPBackend/products" => ["ProductController", "store"],
+    ),
+    "PUT" => array(
+        "/CSPBackend/product/(\d+)" => ["ProductController", "update"],
+    ),
+    "DELETE" => array(
+        "/CSPBackend/product/(\d+)" => ["ProductController", "destroy"],
+    ),
+
 
 
 );
 
 $request_uri = $_SERVER['REQUEST_URI'];
+$request_method = $_SERVER['REQUEST_METHOD'];
 
-foreach ($routes as $route => $function) {
-    if (preg_match("~^$route$~", $request_uri, $matches)) {
-        array_shift($matches);
-        $controllerInstance = new $function[0]();
-        call_user_func_array([$controllerInstance, $function[1]], $matches);
-        exit();
+if (isset($routes[$request_method])) {
+    foreach ($routes[$request_method] as $route => $function) {
+        if (preg_match("~^$route$~", $request_uri, $matches)) {
+            array_shift($matches);
+
+            $controllerName = $function[0];
+            $methodName = $function[1];
+            $controllerInstance = new $controllerName();
+            call_user_func_array([$controllerInstance, $methodName], $matches);
+            exit();
+        }
     }
 }
 
