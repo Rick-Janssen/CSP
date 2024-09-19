@@ -7,6 +7,8 @@ foreach ($controllers as $controller) {
 
 $routes = array(
     "/CSPBackend/products" => ["ProductController", "index"],
+    "/CSPBackend/product/(\d+)" => ["ProductController", "show"],
+
 
 );
 

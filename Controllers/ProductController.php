@@ -20,6 +20,28 @@ class ProductController
             echo json_encode(array("message" => "No products found with ratings"));
         }
 
+
+        $stmt->close();
+        $conn->close();
+    }
+    public function show($id)
+    {
+        $conn = connectToDatabase();
+
+        $sql = "SELECT * FROM `products` WHERE id = ?";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            echo json_encode($row);
+        } else {
+            echo json_encode(array("message" => "No products found with ID $id"));
+        }
+
         $stmt->close();
         $conn->close();
     }
