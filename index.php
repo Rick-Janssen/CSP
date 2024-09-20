@@ -7,18 +7,18 @@ foreach ($controllers as $controller) {
 
 $routes = array(
     "GET" => array(
-        "/CSPBackend/products" => ["ProductController", "index"],
-        "/CSPBackend/product/(\d+)" => ["ProductController", "show"],
+        "/csp-backend/products" => ["ProductController", "index"],
+        "/csp-backend/product/(\d+)" => ["ProductController", "show"],
 
     ),
     "POST" => array(
-        "/CSPBackend/products" => ["ProductController", "store"],
+        "/csp-backend/products" => ["ProductController", "store"],
     ),
     "PUT" => array(
-        "/CSPBackend/product/(\d+)" => ["ProductController", "update"],
+        "/csp-backend/product/(\d+)" => ["ProductController", "update"],
     ),
     "DELETE" => array(
-        "/CSPBackend/product/(\d+)" => ["ProductController", "destroy"],
+        "/csp-backend/product/(\d+)" => ["ProductController", "destroy"],
     ),
 
 
