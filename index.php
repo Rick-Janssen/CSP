@@ -16,6 +16,7 @@ $routes = array(
 
         "/csp-backend/product/(\d+)/review" => ["ReviewController", "store"],
 
+        // USERS
         "/csp-backend/login" => ["UserController", "login"],
         "/csp-backend/register" => ["UserController", "register"],
         "/csp-backend/logout" => ["UserController", "logout"]
