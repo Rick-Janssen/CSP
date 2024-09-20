@@ -21,7 +21,7 @@ $routes = array(
         "/csp-backend/product/(\d+)" => ["ProductController", "destroy"],
         "/csp-backend/product/(\d+)" => ["ProductController", "destroy"],
 
-        "csp-backend/product/(\d+)/review/(\d+)" => ["ReviewController", "destroy"]
+        "/csp-backend/product/(\d+)/review/(\d+)" => ["ReviewController", "destroy"]
     ),
 
 
