@@ -7,8 +7,8 @@ foreach ($controllers as $controller) {
 
 $routes = array(
     "GET" => array(
-        "/CSP-Backend/products" => ["ProductController", "index"],
-        "/CSP-Backend/product/(\d+)" => ["ProductController", "show"],
+        "/csp-backend/products" => ["ProductController", "index"],
+        "/csp-backend/product/(\d+)" => ["ProductController", "show"],
 
     ),
     "POST" => array(
@@ -21,12 +21,13 @@ $routes = array(
         "/CSP-Backend/logout" => ["UserController", "logout"]
     ),
     "PUT" => array(
-        "/CSP-Backend/product/(\d+)" => ["ProductController", "update"],
+        "/csp-backend/product/(\d+)" => ["ProductController", "update"],
     ),
     "DELETE" => array(
-        "/CSP-Backend/product/(\d+)" => ["ProductController", "destroy"],
+        "/csp-backend/product/(\d+)" => ["ProductController", "destroy"],
+        "/csp-backend/product/(\d+)" => ["ProductController", "destroy"],
 
-        "/CSP-Backend/product/(\d+)/review/(\d+)" => ["ReviewController", "destroy"]
+        "/csp-backend/product/(\d+)/review/(\d+)" => ["ReviewController", "destroy"]
     ),
 
 
