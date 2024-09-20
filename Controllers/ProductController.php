@@ -36,6 +36,7 @@ class ProductController
 
             if ($row['review_id'] !== null) {
                 $products[$productId]['reviews'][] = [
+                    'id' => $row['review_id'],
                     'title' => $row['title'],
                     'content' => $row['content'],
                     'rating' => $row['rating'],
