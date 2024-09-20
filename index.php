@@ -13,12 +13,20 @@ $routes = array(
     ),
     "POST" => array(
         "/csp-backend/products" => ["ProductController", "store"],
+
+        "/csp-backend/product/(\d+)/review" => ["ReviewController", "store"],
+
+        // USERS
+        "/csp-backend/login" => ["UserController", "login"],
+        "/csp-backend/register" => ["UserController", "register"],
+        "/csp-backend/logout" => ["UserController", "logout"]
     ),
     "PUT" => array(
         "/csp-backend/product/(\d+)" => ["ProductController", "update"],
     ),
     "DELETE" => array(
         "/csp-backend/product/(\d+)" => ["ProductController", "destroy"],
+
 
         "/csp-backend/product/(\d+)/review/(\d+)" => ["ReviewController", "destroy"]
     ),
