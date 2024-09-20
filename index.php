@@ -14,7 +14,11 @@ $routes = array(
     "POST" => array(
         "/CSP-Backend/products" => ["ProductController", "store"],
 
-        "/CSP-Backend/product/(\d+)/review" => ["ReviewController", "store"]
+        "/CSP-Backend/product/(\d+)/review" => ["ReviewController", "store"],
+
+        "/CSP-Backend/login" => ["UserController", "login"],
+        "/CSP-Backend/register" => ["UserController", "register"],
+        "/CSP-Backend/logout" => ["UserController", "logout"]
     ),
     "PUT" => array(
         "/CSP-Backend/product/(\d+)" => ["ProductController", "update"],
