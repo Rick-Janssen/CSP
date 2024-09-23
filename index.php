@@ -4,6 +4,7 @@ $controllers = glob('Controllers/*.php');
 foreach ($controllers as $controller) {
     require_once $controller;
 }
+require_once 'AuthMiddleware.php';
 
 $routes = array(
     "GET" => array(
@@ -12,7 +13,12 @@ $routes = array(
 
     ),
     "POST" => array(
-        "/csp-backend/products" => ["ProductController", "store"],
+        "/csp-backend/products" => [
+            "ProductController",
+            "store",
+            "AuthMiddleware",
+            "checkAdmin"
+        ],
 
         "/csp-backend/product/(\d+)/review" => ["ReviewController", "store"],
 
@@ -42,6 +48,12 @@ if (isset($routes[$request_method])) {
     foreach ($routes[$request_method] as $route => $function) {
         if (preg_match("~^$route$~", $request_uri, $matches)) {
             array_shift($matches);
+
+            if (isset($function[2]) && isset($function[3])) {
+
+                $middleware = new $function[2]();
+                call_user_func([$middleware, $function[3]]);
+            }
 
             $controllerName = $function[0];
             $methodName = $function[1];

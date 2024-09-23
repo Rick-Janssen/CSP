@@ -81,16 +81,32 @@ class ProductController
     {
         $conn = connectToDatabase();
 
+
         $input = json_decode(file_get_contents('php://input'), true);
 
 
-        if (isset($input['name']) && !empty($input['name'])) {
-            $name = $input['name'];
+        if (
+            isset($input['name'], $input['description'], $input['image_url'], $input['origin'], $input['type']) &&
+            !empty($input['name']) &&
+            !empty($input['description']) &&
+            !empty($input['image_url']) &&
+            !empty($input['origin']) &&
+            !empty($input['type'])
+        ) {
 
-            $sql = "INSERT INTO `products` (name) VALUES (?)";
+
+            $name = $input['name'];
+            $description = $input['description'];
+            $image_url = $input['image_url'];
+            $origin = $input['origin'];
+            $type = $input['type'];
+
+
+            $sql = "INSERT INTO `products` (name, description, image_url, origin, type) VALUES (?, ?, ?, ?, ?)";
 
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("s", $name);
+            $stmt->bind_param("sssss", $name, $description, $image_url, $origin, $type);
+
 
             if ($stmt->execute()) {
                 echo json_encode(array("message" => "Product added successfully"));
@@ -100,11 +116,12 @@ class ProductController
 
             $stmt->close();
         } else {
-            echo json_encode(array("message" => "Invalid input: 'name' is required"));
+            echo json_encode(array("message" => "Invalid input: All fields are required"));
         }
 
         $conn->close();
     }
+
     public function update($id)
     {
         $conn = connectToDatabase();
