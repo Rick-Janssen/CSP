@@ -1,4 +1,17 @@
 <?php
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    // Send the headers that indicate that the POST request will be accepted
+    header("Access-Control-Allow-Origin: *");
+    header("Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE");
+    header("Access-Control-Allow-Headers: Content-Type, Authorization");
+    http_response_code(200); // Send OK status for preflight
+    exit(); // Terminate further execution as this is a preflight request
+}
+// Allow CORS
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
+header("Access-Control-Allow-Headers: Content-Type");
+
 require_once 'DBconn.php';
 
 class ReviewController

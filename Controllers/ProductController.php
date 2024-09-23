@@ -1,4 +1,17 @@
 <?php
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    // Send the headers that indicate that the POST request will be accepted
+    header("Access-Control-Allow-Origin: *");
+    header("Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE");
+    header("Access-Control-Allow-Headers: Content-Type, Authorization");
+    http_response_code(200); // Send OK status for preflight
+    exit(); // Terminate further execution as this is a preflight request
+}
+// Allow CORS
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
+header("Access-Control-Allow-Headers: Content-Type");
+
 require_once 'DBconn.php';
 
 class ProductController
@@ -56,27 +69,40 @@ class ProductController
         $conn->close();
     }
 
-    public function show($id)
+    public function show($product_id)
     {
         $conn = connectToDatabase();
 
-        $sql = "SELECT * FROM `products` WHERE id = ?";
+        // Fetch product details
+        $sql_product = "SELECT * FROM products WHERE id = ?";
+        $stmt_product = $conn->prepare($sql_product);
+        $stmt_product->bind_param("i", $product_id);
+        $stmt_product->execute();
+        $result_product = $stmt_product->get_result();
+        $product = $result_product->fetch_assoc();
 
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        if ($product) {
+            // Fetch reviews for the product
+            $sql_reviews = "SELECT * FROM reviews WHERE product_id = ?";
+            $stmt_reviews = $conn->prepare($sql_reviews);
+            $stmt_reviews->bind_param("i", $product_id);
+            $stmt_reviews->execute();
+            $result_reviews = $stmt_reviews->get_result();
+            $reviews = $result_reviews->fetch_all(MYSQLI_ASSOC);
 
-        if ($result->num_rows > 0) {
-            $row = $result->fetch_assoc();
-            echo json_encode($row);
+            // Include the reviews in the product data
+            $product['reviews'] = $reviews;
+
+            echo json_encode($product);
         } else {
-            echo json_encode(array("message" => "No products found with ID $id"));
+            echo json_encode(["message" => "Product not found"]);
         }
 
-        $stmt->close();
+        $stmt_product->close();
+        $stmt_reviews->close();
         $conn->close();
     }
+
     public function store()
     {
         $conn = connectToDatabase();
