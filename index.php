@@ -15,6 +15,7 @@ $controllers = glob('Controllers/*.php');
 foreach ($controllers as $controller) {
     require_once $controller;
 }
+require_once 'AuthMiddleware.php';
 
 $routes = array(
     "GET" => array(
@@ -23,15 +24,36 @@ $routes = array(
         "/csp-backend/product/(\d+)" => ["ProductController", "show"],
     ),
     "POST" => array(
-        "/csp-backend/products" => ["ProductController", "store"],
+        "/csp-backend/products" => [
+            "ProductController",
+            "store",
+            "AuthMiddleware",
+            "checkAdmin"
+        ],
+
         "/csp-backend/product/(\d+)/review" => ["ReviewController", "store"],
+
+        // USERS
+        "/csp-backend/login" => ["UserController", "login"],
+        "/csp-backend/register" => ["UserController", "register"],
+        "/csp-backend/logout" => ["UserController", "logout"]
     ),
     "PUT" => array(
-        "/csp-backend/product/(\d+)" => ["ProductController", "update"],
+        "/csp-backend/product/(\d+)" => [
+            "ProductController",
+            "update",
+            "AuthMiddleware",
+            "checkAdmin"
+        ],
     ),
     "DELETE" => array(
-        "/csp-backend/product/(\d+)" => ["ProductController", "destroy"],
-        "/csp-backend/product/(\d+)" => ["ProductController", "destroy"],
+        "/csp-backend/product/(\d+)" => [
+            "ProductController",
+            "destroy",
+            "AuthMiddleware",
+            "checkAdmin"
+        ],
+
 
         "/csp-backend/product/(\d+)/review/(\d+)" => ["ReviewController", "destroy"]
     ),
@@ -47,6 +69,12 @@ if (isset($routes[$request_method])) {
     foreach ($routes[$request_method] as $route => $function) {
         if (preg_match("~^$route$~", $request_uri, $matches)) {
             array_shift($matches);
+
+            if (isset($function[2]) && isset($function[3])) {
+
+                $middleware = new $function[2]();
+                call_user_func([$middleware, $function[3]]);
+            }
 
             $controllerName = $function[0];
             $methodName = $function[1];
