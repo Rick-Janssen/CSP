@@ -28,10 +28,20 @@ $routes = array(
         "/csp-backend/logout" => ["UserController", "logout"]
     ),
     "PUT" => array(
-        "/csp-backend/product/(\d+)" => ["ProductController", "update"],
+        "/csp-backend/product/(\d+)" => [
+            "ProductController",
+            "update",
+            "AuthMiddleware",
+            "checkAdmin"
+        ],
     ),
     "DELETE" => array(
-        "/csp-backend/product/(\d+)" => ["ProductController", "destroy"],
+        "/csp-backend/product/(\d+)" => [
+            "ProductController",
+            "destroy",
+            "AuthMiddleware",
+            "checkAdmin"
+        ],
 
 
         "/csp-backend/product/(\d+)/review/(\d+)" => ["ReviewController", "destroy"]

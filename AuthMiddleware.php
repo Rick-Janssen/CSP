@@ -5,7 +5,7 @@ class AuthMiddleware
 {
     public static function checkAdmin()
     {
-        // Get token from the request headers
+
         $headers = getallheaders();
         $authToken = isset($headers['Authorization']) ? trim($headers['Authorization']) : '';
 
@@ -15,18 +15,17 @@ class AuthMiddleware
             exit();
         }
 
-        $token = $matches[1]; // Extract the token part after "Bearer"
+        $token = $matches[1];
 
-        // Validate token with the database
+
         $user = self::getUserByToken($token);
 
-        if ($user === null) { // Check for null
+        if ($user === null) {
             http_response_code(401);
             echo "Unauthorized. Invalid token.";
             exit();
         }
 
-        // Check if the user is admin
         if ($user['role'] !== 'admin') {
             http_response_code(403);
             echo "Forbidden. Admin access required.";
