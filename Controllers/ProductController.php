@@ -1,4 +1,17 @@
 <?php
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    // Send the headers that indicate that the POST request will be accepted
+    header("Access-Control-Allow-Origin: *");
+    header("Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE");
+    header("Access-Control-Allow-Headers: Content-Type, Authorization");
+    http_response_code(200); // Send OK status for preflight
+    exit(); // Terminate further execution as this is a preflight request
+}
+// Allow CORS
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
+header("Access-Control-Allow-Headers: Content-Type");
+
 require_once 'DBconn.php';
 
 class ProductController
@@ -56,7 +69,7 @@ class ProductController
         $conn->close();
     }
 
-    public function show($id)
+    public function show($product_id)
     {
         $conn = connectToDatabase();
 
@@ -104,10 +117,11 @@ class ProductController
             $product['reviews'] = $reviews;
             echo json_encode($product);
         } else {
-            echo json_encode(array("message" => "No products found with ID $id"));
+            echo json_encode(["message" => "Product not found"]);
         }
 
-        $stmt->close();
+        $stmt_product->close();
+        $stmt_reviews->close();
         $conn->close();
     }
 
