@@ -60,16 +60,49 @@ class ProductController
     {
         $conn = connectToDatabase();
 
-        $sql = "SELECT * FROM `products` WHERE id = ?";
+        // SQL query to fetch the product and its reviews
+        $sql = "
+        SELECT p.id as product_id, p.name, p.description, p.image_url, p.origin, p.type, 
+               r.id as review_id, r.title, r.rating, r.content
+        FROM products p
+        LEFT JOIN reviews r ON p.id = r.product_id
+        WHERE p.id = ?
+    ";
 
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $id);
         $stmt->execute();
         $result = $stmt->get_result();
 
-        if ($result->num_rows > 0) {
-            $row = $result->fetch_assoc();
-            echo json_encode($row);
+        $product = null;
+        $reviews = [];
+
+        while ($row = $result->fetch_assoc()) {
+            if (!$product) {
+                $product = [
+                    'id' => $row['product_id'],
+                    'name' => $row['name'],
+                    'description' => $row['description'],
+                    'image_url' => $row['image_url'],
+                    'origin' => $row['origin'],
+                    'type' => $row['type'],
+                    'reviews' => []
+                ];
+            }
+
+            if ($row['review_id'] !== null) {
+                $reviews[] = [
+                    'id' => $row['review_id'],
+                    'title' => $row['title'],
+                    'content' => $row['content'],
+                    'rating' => $row['rating'],
+                ];
+            }
+        }
+
+        if ($product) {
+            $product['reviews'] = $reviews;
+            echo json_encode($product);
         } else {
             echo json_encode(array("message" => "No products found with ID $id"));
         }
@@ -77,6 +110,7 @@ class ProductController
         $stmt->close();
         $conn->close();
     }
+
     public function store()
     {
         $conn = connectToDatabase();
