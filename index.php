@@ -21,7 +21,7 @@ $routes = array(
     "GET" => array(
         "/csp-backend/products" => ["ProductController", "index"],
         "/csp-backend/product/(\d+)" => ["ProductController", "show"],
-        "/csp-backend/product/(\d+)" => ["ProductController", "show"],
+
     ),
     "POST" => array(
         "/csp-backend/products" => [
