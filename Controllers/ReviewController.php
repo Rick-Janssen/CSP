@@ -23,20 +23,20 @@ class ReviewController
         $data = json_decode(file_get_contents('php://input'), true);
 
 
-        if (isset($data['title'], $data['content'], $data['rating'])) {
+        if (isset($data['content'], $data['rating'])) {
 
-            $title = $data['title'];
+
             $content = $data['content'];
             $rating = $data['rating'];
 
 
             $sql = "
-            INSERT INTO reviews (product_id, title, content, rating)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO reviews (product_id, content, rating)
+            VALUES (?, ?, ?)
         ";
 
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("issi", $product_id, $title, $content, $rating);
+            $stmt->bind_param("issi", $product_id,  $content, $rating);
 
             if ($stmt->execute()) {
                 echo json_encode(["message" => "Review added successfully"]);
@@ -47,7 +47,7 @@ class ReviewController
             $stmt->close();
         } else {
 
-            echo json_encode(["message" => "Invalid input, missing title, content, or rating"]);
+            echo json_encode(["message" => "Invalid input, content, or rating"]);
         }
 
         $conn->close();
