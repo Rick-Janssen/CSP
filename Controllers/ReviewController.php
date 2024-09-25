@@ -36,7 +36,7 @@ class ReviewController
         ";
 
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("isi", $product_id,  $content, $rating);
+            $stmt->bind_param("isd", $product_id,  $content, $rating);
 
             if ($stmt->execute()) {
                 echo json_encode(["message" => "Review added successfully"]);
