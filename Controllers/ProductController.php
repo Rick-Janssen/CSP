@@ -119,9 +119,6 @@ class ProductController
         } else {
             echo json_encode(["message" => "Product not found"]);
         }
-
-        $stmt_product->close();
-        $stmt_reviews->close();
         $conn->close();
     }
 
