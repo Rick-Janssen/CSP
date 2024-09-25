@@ -9,30 +9,45 @@ class UserController
 
         $input = json_decode(file_get_contents('php://input'), true);
 
-
-        if (isset($input)) {
+        if (isset($input['name'], $input['email'], $input['password'])) {
             $name = $input['name'];
             $email = $input['email'];
             $rawPassword = $input['password'];
             $password = password_hash($rawPassword, PASSWORD_DEFAULT);
-            $sql = "INSERT INTO `users` (name, email, password) VALUES (?, ?, ?)";
 
+            $sql = "INSERT INTO `users` (name, email, password) VALUES (?, ?, ?)";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("sss", $name, $email, $password);
 
             if ($stmt->execute()) {
-                echo json_encode(array("message" => "User added successfully"));
+                // User successfully registered, now auto-login
+                $userId = $stmt->insert_id;
+
+                // Generate a token for automatic login
+                $token = bin2hex(random_bytes(32));
+
+                // Store the token in the database
+                $updateTokenSql = "UPDATE users SET token = ? WHERE id = ?";
+                $updateStmt = $conn->prepare($updateTokenSql);
+                $updateStmt->bind_param("si", $token, $userId);
+                $updateStmt->execute();
+
+                // Return the token so the frontend can log the user in
+                echo json_encode(["message" => "User registered and logged in successfully", "token" => $token]);
+
+                $updateStmt->close();
             } else {
-                echo json_encode(array("message" => "Failed to add user"));
+                echo json_encode(["message" => "Failed to register user"]);
             }
 
             $stmt->close();
         } else {
-            echo json_encode(array("message" => "Missing values"));
+            echo json_encode(["message" => "Missing values"]);
         }
 
         $conn->close();
     }
+
     public function login()
     {
         $conn = connectToDatabase();
@@ -96,7 +111,8 @@ class UserController
             $result = $stmt->get_result();
 
             if ($result->num_rows > 0) {
-                return true;
+                // Token is valid, return success
+                echo json_encode(["message" => null]); // Indicate that the token is valid
             } else {
                 http_response_code(401);
                 echo json_encode(["message" => "Invalid token"]);

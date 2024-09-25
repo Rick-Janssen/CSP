@@ -73,17 +73,16 @@ class ProductController
     {
         $conn = connectToDatabase();
 
-        // SQL query to fetch the product and its reviews
         $sql = "
-        SELECT p.id as product_id, p.name, p.description, p.image_url, p.origin, p.type, 
-               r.id as review_id, r.title, r.rating, r.content
-        FROM products p
-        LEFT JOIN reviews r ON p.id = r.product_id
-        WHERE p.id = ?
+    SELECT p.id as product_id, p.name, p.description, p.image_url, p.origin, p.type, 
+           r.id as review_id, r.title, r.rating, r.content
+    FROM products p
+    LEFT JOIN reviews r ON p.id = r.product_id
+    WHERE p.id = ?
     ";
 
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $id);
+        $stmt->bind_param("i", $product_id);
         $stmt->execute();
         $result = $stmt->get_result();
 
@@ -120,9 +119,10 @@ class ProductController
             echo json_encode(["message" => "Product not found"]);
         }
 
-
+        $stmt->close();
         $conn->close();
     }
+
 
     public function store()
     {
