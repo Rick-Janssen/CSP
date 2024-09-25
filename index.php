@@ -21,7 +21,7 @@ $routes = array(
     "GET" => array(
         "/csp-backend/products" => ["ProductController", "index"],
         "/csp-backend/product/(\d+)" => ["ProductController", "show"],
-        "/csp-backend/product/(\d+)" => ["ProductController", "show"],
+
     ),
     "POST" => array(
         "/csp-backend/products" => [
@@ -34,6 +34,7 @@ $routes = array(
         "/csp-backend/product/(\d+)/review" => ["ReviewController", "store"],
 
         // USERS
+        "/csp-backend/authenticate" => ["UserController", "authenticate"],
         "/csp-backend/login" => ["UserController", "login"],
         "/csp-backend/register" => ["UserController", "register"],
         "/csp-backend/logout" => ["UserController", "logout"]
