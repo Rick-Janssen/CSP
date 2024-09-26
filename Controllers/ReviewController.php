@@ -38,7 +38,7 @@ class ReviewController
 
         function callApi($method, $url, $data)
         {
-            
+
             $env = parse_ini_file('.env');
 
             $apiKey = $env['API_KEY'];
@@ -122,14 +122,14 @@ class ReviewController
             } else {
                 // Prepare SQL query, allowing user_id and user_name to be NULL (for anonymous users)
                 $sql = "
-                    INSERT INTO reviews (product_id, user_id, user_name, content, rating)
-                    VALUES (?, ?, ?, ?, ?)
+                    INSERT INTO reviews (product_id, user_id, content, rating)
+                    VALUES (?, ?, ?, ?)
                 ";
 
                 $stmt = $conn->prepare($sql);
 
                 // Bind parameters, with user_id and user_name potentially being NULL
-                $stmt->bind_param("iissd", $product_id, $user_id, $user_name, $content, $rating);
+                $stmt->bind_param("iisd", $product_id, $user_id, $content, $rating);
 
                 if ($stmt->execute()) {
                     echo json_encode(["message" => "Review added successfully"]);
@@ -176,4 +176,3 @@ class ReviewController
         $conn->close();
     }
 }
-?>
