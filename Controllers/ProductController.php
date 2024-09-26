@@ -21,7 +21,7 @@ class ProductController
         $conn = connectToDatabase();
 
         $sql = "
-        SELECT p.id as product_id, p.description, p.image_url, p.origin, p.type ,  p.name product_name, r.id as review_id, r.rating, r.content
+        SELECT p.id as product_id, p.description, p.image_url, p.origin, p.type ,  p.name product_name, r.id as review_id, r.user_id, r.rating, r.content
         FROM products p
         LEFT JOIN reviews r ON p.id = r.product_id
     ";
@@ -50,6 +50,7 @@ class ProductController
             if ($row['review_id'] !== null) {
                 $products[$productId]['reviews'][] = [
                     'id' => $row['review_id'],
+                    'user_id' => $row['user_id'],
                     'content' => $row['content'],
                     'rating' => $row['rating'],
                 ];
@@ -59,7 +60,7 @@ class ProductController
         $products = array_values($products);
 
         if (!empty($products)) {
-            echo json_encode($products);
+            echo json_encode(value: $products);
         } else {
             echo json_encode(["message" => "No products or reviews found"]);
         }
@@ -74,7 +75,7 @@ class ProductController
 
         $sql = "
     SELECT p.id as product_id, p.name, p.description, p.image_url, p.origin, p.type, 
-           r.id as review_id, r.rating, r.content
+           r.id as review_id, r.rating, r.user_id, r.user_name, r.content
     FROM products p
     LEFT JOIN reviews r ON p.id = r.product_id
     WHERE p.id = ?
@@ -104,6 +105,8 @@ class ProductController
             if ($row['review_id'] !== null) {
                 $reviews[] = [
                     'id' => $row['review_id'],
+                    'user_id' => $row['user_id'],
+                    'user_name' => $row['user_name'],
                     'content' => $row['content'],
                     'rating' => $row['rating'],
                 ];
