@@ -44,36 +44,39 @@ class ReviewController
         $headers = getallheaders();
         $token = isset($headers['Authorization']) ? str_replace('Bearer ', '', $headers['Authorization']) : null;
 
-        // Default to NULL for user_id and user_name (anonymous review)
-        $user_id = null;
-        $user_name = null;
+        // If no token is provided, return an error message
+        if (!$token) {
+            echo json_encode(["message" => "Authorization token missing. You must be logged in to post a review."]);
+            http_response_code(401);
+            return;
+        }
 
-        // If a token is provided, attempt to verify it and get user info
-        if ($token) {
-            $user = verifyToken($token); // Verify token and fetch user details
+        // Verify the provided token and get user info
+        $user = verifyToken($token);
 
-            if ($user) {
-                // Assign user_id and user_name from the verified token
-                $user_id = $user['id'];
-                $user_name = $user['name'];
-            }
+        // If the token is invalid or the user is not found, return an error message
+        if (!$user) {
+            echo json_encode(["message" => "Invalid or expired token. Please log in again."]);
+            http_response_code(401);
+            return;
         }
 
         // Ensure the content and rating fields are present in the request
         if (isset($data['content'], $data['rating'])) {
             $content = $data['content'];
             $rating = $data['rating'];
+            $user_id = $user['id']; // Use the verified user ID
 
-            // Prepare SQL query, allowing user_id and user_name to be NULL (for anonymous users)
+            // Prepare SQL query to insert the review
             $sql = "
-        INSERT INTO reviews (product_id, user_id, user_name, content, rating)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO reviews (product_id, user_id, content, rating)
+        VALUES (?, ?, ?, ?)
         ";
 
             $stmt = $conn->prepare($sql);
 
-            // Bind parameters, with user_id and user_name potentially being NULL
-            $stmt->bind_param("iissd", $product_id, $user_id, $user_name, $content, $rating);
+            // Bind parameters
+            $stmt->bind_param("iisd", $product_id, $user_id, $content, $rating);
 
             if ($stmt->execute()) {
                 echo json_encode(["message" => "Review added successfully"]);
@@ -88,6 +91,7 @@ class ReviewController
 
         $conn->close();
     }
+
 
 
     public function destroy($product_id, $review_id)

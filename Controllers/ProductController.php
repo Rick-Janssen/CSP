@@ -75,11 +75,15 @@ class ProductController
 
         $sql = "
     SELECT p.id as product_id, p.name, p.description, p.image_url, p.origin, p.type, 
-           r.id as review_id, r.rating, r.user_id, r.user_name, r.content
+           r.id as review_id, r.rating, r.user_id, r.content, 
+           u.name as user_name
     FROM products p
     LEFT JOIN reviews r ON p.id = r.product_id
+    LEFT JOIN users u ON r.user_id = u.id
     WHERE p.id = ?
-    ";
+";
+
+
 
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $product_id);
