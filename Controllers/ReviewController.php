@@ -118,7 +118,7 @@ class ReviewController
             $is_flagged = isset($response['results'][0]['flagged']) ? $response['results'][0]['flagged'] : false;
 
             if ($is_flagged) {
-                echo json_encode(["message" => "The content contains inappropriate material and cannot be posted."]);
+                echo json_encode(["message" => "The content contains inappropriate material and cannot be posted.", "flagged" => true]);
             } else {
                 // Prepare SQL query, allowing user_id and user_name to be NULL (for anonymous users)
                 $sql = "
