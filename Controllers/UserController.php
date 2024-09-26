@@ -104,15 +104,21 @@ class UserController
         if (isset($headers['Authorization'])) {
             $token = str_replace('Bearer ', '', $headers['Authorization']);
 
-            $sql = "SELECT id FROM users WHERE token = ?";
+            // Update query to also retrieve the role of the user
+            $sql = "SELECT id, role FROM users WHERE token = ?";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("s", $token);
             $stmt->execute();
             $result = $stmt->get_result();
 
             if ($result->num_rows > 0) {
-                // Token is valid, return success
-                echo json_encode(["message" => null]); // Indicate that the token is valid
+                $user = $result->fetch_assoc();
+
+                // Token is valid, return success with the user's role
+                echo json_encode([
+                    "message" => null,
+                    "role" => $user['role']  // Include role in the response
+                ]);
             } else {
                 http_response_code(401);
                 echo json_encode(["message" => "Invalid token"]);
@@ -126,6 +132,7 @@ class UserController
 
         $conn->close();
     }
+
     public function logout()
     {
         $conn = connectToDatabase();
