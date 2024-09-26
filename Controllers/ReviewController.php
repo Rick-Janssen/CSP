@@ -36,8 +36,46 @@ class ReviewController
             return null; // Token is invalid or user not found
         }
 
-        $conn = connectToDatabase();
+        function callApi($method, $url, $data)
+        {
+            
+            $env = parse_ini_file('.env');
 
+            $apiKey = $env['API_KEY'];
+
+            $curl = curl_init();
+            switch (strtoupper($method)) {
+                case "POST":
+                    curl_setopt($curl, CURLOPT_POST, 1);
+                    if ($data) curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+                    break;
+                case "PUT":
+                    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PUT");
+                    if ($data) curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+                    break;
+                default:
+                    if ($data) $url = sprintf("%s?%s", $url, http_build_query($data));
+            }
+
+            // OPTIONS:
+            curl_setopt($curl, CURLOPT_URL, $url);
+            curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+                "Authorization: Bearer " . $apiKey,
+                'Content-Type: application/json',
+            ));
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+
+            // EXECUTE:
+            $result = curl_exec($curl);
+            if (!$result) {
+                die("Connection Failure");
+            }
+            curl_close($curl);
+            return $result;
+        }
+
+        $conn = connectToDatabase();
         $data = json_decode(file_get_contents('php://input'), true);
 
         // Check for Authorization header with Bearer token
@@ -67,24 +105,40 @@ class ReviewController
             $rating = $data['rating'];
             $user_id = $user['id']; // Use the verified user ID
 
-            // Prepare SQL query to insert the review
-            $sql = "
-        INSERT INTO reviews (product_id, user_id, content, rating)
-        VALUES (?, ?, ?, ?)
-        ";
+            // Moderate content using OpenAI API
+            $data_array = array(
+                "input" => $content
+            );
 
-            $stmt = $conn->prepare($sql);
+            // Call the Moderation API
+            $make_call = callApi('POST', 'https://api.openai.com/v1/moderations', json_encode($data_array));
+            $response = json_decode($make_call, true);
 
-            // Bind parameters
-            $stmt->bind_param("iisd", $product_id, $user_id, $content, $rating);
+            // Check if the content is flagged
+            $is_flagged = isset($response['results'][0]['flagged']) ? $response['results'][0]['flagged'] : false;
 
-            if ($stmt->execute()) {
-                echo json_encode(["message" => "Review added successfully"]);
+            if ($is_flagged) {
+                echo json_encode(["message" => "The content contains inappropriate material and cannot be posted."]);
             } else {
-                echo json_encode(["message" => "Failed to add review"]);
-            }
+                // Prepare SQL query, allowing user_id and user_name to be NULL (for anonymous users)
+                $sql = "
+                    INSERT INTO reviews (product_id, user_id, user_name, content, rating)
+                    VALUES (?, ?, ?, ?, ?)
+                ";
 
-            $stmt->close();
+                $stmt = $conn->prepare($sql);
+
+                // Bind parameters, with user_id and user_name potentially being NULL
+                $stmt->bind_param("iissd", $product_id, $user_id, $user_name, $content, $rating);
+
+                if ($stmt->execute()) {
+                    echo json_encode(["message" => "Review added successfully"]);
+                } else {
+                    echo json_encode(["message" => "Failed to add review"]);
+                }
+
+                $stmt->close();
+            }
         } else {
             echo json_encode(["message" => "Invalid input, content, or rating"]);
         }
@@ -101,13 +155,11 @@ class ReviewController
         $sql = "
         DELETE FROM reviews 
         WHERE id = ? AND product_id = ?
-    ";
+        ";
 
         $stmt = $conn->prepare($sql);
 
-
         $stmt->bind_param("ii", $review_id, $product_id);
-
 
         if ($stmt->execute()) {
 
@@ -124,3 +176,4 @@ class ReviewController
         $conn->close();
     }
 }
+?>
